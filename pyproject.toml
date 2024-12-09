@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "circle-dance"
+version = "0.1.0"
+description = "Music Visualizer"
+authors = ["Oskar Maier <oskar.maier@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pygame = "^2.6.1"
+librosa = "^0.10.2.post1"
+pyaudio = "^0.2.14"
+audioflux = "^0.1.9"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+pre-commit = "^4.0.1"
+
+[tool.poetry.scripts]
+circle_dance = "circle_dance.cli.entrypoint:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
