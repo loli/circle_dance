@@ -16,6 +16,10 @@ audioflux = "^0.1.9"
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
 pre-commit = "^4.0.1"
+flake8 = "^7.1.1"
+flake8-bugbear = "^24.12.12"
+flake8-mutable = "^1.2.0"
+pydoclint = { extras = ["flake8"], version = "^0.5.12" }
 
 [tool.poetry.scripts]
 circle_dance = "circle_dance.cli.entrypoint:main"
@@ -26,3 +30,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 119
+
+[tool.pydoclint]
+style = 'google'
