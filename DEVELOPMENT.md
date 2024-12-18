@@ -119,3 +119,36 @@ time[process(chunk)] < max_processing_duration
 time[render(all)] < min(max_tick_duration, max_render_duration)
 time[render(ft)] < time[render(all)] < min(max_tick_duration, max_render_duration)
 ```
+
+## Full scientific scale visualization
+- Constant Q Transform results in bins that correspond exactely to the notes on the scientific scale
+- We can split them by octave and display each octave on it's own sheet
+- Only use octaves that are sensible to human listening
+
+- an alternative is to use the mel spectopgram, but the resulting bins have no logical grouping like the octaves
+
+## Note onset detection insights
+- provide `slide_length` and `hop_length` everywhere!
+
+### Note peak vs. note onset
+Detecting onset is unsuited point to subsequently determine played note via chromagram, as the onset is before the attack, where the chromagram energy is still low
+- instead, we use the envelope peak location for note determionation: `peak_frames = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr, normalize=True, backtrack=False, hop_length=hop_length)`
+- we still compute the onset, as it determines the time the note starts: `onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr, normalize=True, backtrack=True, hop_length=hop_length)`
+
+### Delayed peak detection on chunks
+When working with audio chunks, the chromagram tends to show relatively low values int he last few frames - just the once that are newly incoming. Restricting peak detection to these new frames only makes us hence miss a lot of peaks.
+
+Instead, we can allow also peaks that reach 1-2 or even 3 frames into the carryover part of the processed chunk.
+
+### Detect on each chromagram lane
+- An alternative to detecting the note onsets on the audio wave form is to detect the notes (aka peaks) on each chromagram lane / pitch separately
+  - Works quite nice if chromagram is thresholded beforehand
+  - Removes need to determine the played note at onset
+
+### Suggested settings
+- use computation on chromagram
+- set new = 3 * 1024 (can be less)
+- set carryover = 8 * 1024 (can be less)
+- set hop length = 512 (can be 1024)
+- set chroma threshold = 0.25
+- allow peaks that appear either in new frames or up top two frames before that

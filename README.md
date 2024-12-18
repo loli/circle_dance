@@ -6,8 +6,8 @@ Visualization library and tool for music streams. Can either play and visualize 
 `poetry install`
 
 ## Usage
-- To play: `circle_dance play songs/song.mp3 --note-type=dot -t 0.75`
-- To listen: `circle_dance play listen --note-type=sarc -t 0.9`
+- To play: `circle_dance play songs/song.mp3 --note-type=dot -t 0.25`
+- To listen: `circle_dance play listen --note-type=sarc -t 0.3`
 
 ## Screenshot
 ![screenshot](screenshot.png)

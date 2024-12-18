@@ -71,7 +71,6 @@ def stream_reader(
         while not close_request_event.is_set():
             carryover_offset_samples = len(buffer)
             carryover_offset_sec = carryover_offset_samples / RATE
-            # print("sp: carryover_offset_sec", carryover_offset_sec)
 
             # fill up buffer
             while len(buffer) - carryover_offset_samples < CHUNK * buffer_replenish_multiplier:

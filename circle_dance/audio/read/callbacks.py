@@ -3,6 +3,8 @@
 
 import logging
 
+import librosa
+import numpy as np
 import numpy.typing as npt
 
 from circle_dance.audio import process
@@ -11,15 +13,17 @@ logger = logging.getLogger(__name__)
 
 
 # Note: prefers steam_reader with
-#    buffer_replenish_multiplier = 5
-#    buffer_carryover_multiplier = 20
+#    buffer_replenish_multiplier = 3
+#    buffer_carryover_multiplier = 8
 def extract_node_onsets_callback(
     buffer: npt.NDArray,
     sr: float,
     stream_clock: float,
     carryover_samples: int,
     carryover_time_sec: float,
-    threshold: float = 0.99,
+    threshold: float = 0.25,
+    slide_length: int = 512,
+    peak_detection_delay_frames: int = 1,
 ) -> npt.NDArray:
     """
     Extracts note onsets from an audio buffer and adds them to a queue.
@@ -28,7 +32,7 @@ def extract_node_onsets_callback(
     It adjusts the onset times to account for the carryover samples from the previous iteration/buffer.
 
     Usage:
-        `notes_producer(lambda *args, **kwargs: process_buffer_callback(*args, **kwargs, threshold=0.9), ...)`
+        `notes_producer(lambda *args, **kwargs: process_buffer_callback(*args, **kwargs, threshold=0.25), ...)`
 
     Args:
         queue: The queue to put the detected notes into.
@@ -40,16 +44,28 @@ def extract_node_onsets_callback(
             iteration/buffer
         carryover_time_sec: the time in seconds of the carryover samples
         threshold: The energy threshold for considering a note as active, between 0 and 1.
+        slide_length: slide_length, hop_length, window_length for all filters
+        peak_detection_delay_frames: a detected peak is allowed to be up to this many frames inside the carry over
+            samples; alivates problem of missing peaks due to the small new sample sizes
 
     Returns:
         Notes cleaned from carryover effects.
     """
     # extract notes
-    notes_with_onsets = process.extract_note_onsets(buffer.astype(float), sr=sr, threshold=threshold)
+    notes_with_onsets = process.extract_note_onsets(
+        buffer.astype(float), sr=sr, threshold=threshold, slide_length=slide_length
+    )
+
+    if len(notes_with_onsets) == 0:
+        return np.zeros(0)
 
     # remove carryover part and adjust times
     notes_with_onsets[:, 1:2] -= carryover_time_sec  # adjust onset times
-    notes_with_onsets = notes_with_onsets[notes_with_onsets[:, 1] > 0]  # remove notes wiht onset in the past
+    # remove notes with onset in the past (obsolete, too few peaks detected in short chunk duration)
+    # notes_with_onsets = notes_with_onsets[notes_with_onsets[:, 1] > 0]
+    # remove notes with onset furether in the past than the allowed peak delay
+    peak_detection_delay_s = librosa.frames_to_time(peak_detection_delay_frames, sr=sr, hop_length=slide_length)
+    notes_with_onsets = notes_with_onsets[notes_with_onsets[:, 1] > -peak_detection_delay_s]
 
     # add stream clock to times to get real clock times of notes
     notes_with_onsets[:, 1:2] += stream_clock
@@ -66,7 +82,7 @@ def extract_note_durations_callback(
     stream_clock: float,
     carryover_samples: int,
     carryover_time_sec: float,
-    threshold: float = 0.99,
+    threshold: float = 0.25,
 ) -> npt.NDArray:
     # extract notes
     notes_with_durations = process.extract_note_durations(buffer.astype(float), sr=sr, thr=threshold)

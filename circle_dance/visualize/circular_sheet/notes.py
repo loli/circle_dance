@@ -32,7 +32,15 @@ class Note(Drawable, ABC):
 
 class DotNote(Note):
     def __init__(
-        self, surface: pygame.Surface, x: float, y: float, size: int, color: T_COLOR, onset: float, lifetime: float
+        self,
+        surface: pygame.Surface,
+        x: float,
+        y: float,
+        size: int,
+        color: T_COLOR,
+        onset: float,
+        lifetime: float,
+        final_size_multiplier: int = 7,
     ):
         """Define a note on a surfaced visualized as a dot/circle.
 
@@ -44,6 +52,7 @@ class DotNote(Note):
             color: color of the note
             onset: time when the note is played; seconds
             lifetime: time the note should be displayed for; seconds
+            final_size_multiplier: final size of note at the end of it's liftime is size * final_size_multiplier
         """
         super().__init__(surface)
 
@@ -53,6 +62,7 @@ class DotNote(Note):
         self.color = color
         self.onset = onset
         self.lifetime = lifetime
+        self.final_size_multiplier = final_size_multiplier
 
     def is_alive(self, t: float) -> bool:
         return self.onset + self.lifetime >= t
@@ -75,7 +85,7 @@ class DotNote(Note):
         """
         alpha = int(255 * strength)
         color = self.color[:3] + (alpha,)
-        size = self.size * ((1 - strength) * 10 + 1)
+        size = self.size * ((1 - strength) * self.final_size_multiplier + 1)
         draw_circle_alpha(self.surface, color, (self.x, self.y), size)
         # pygame.draw.circle(self.surface, color, (self.x, self.y), size)
 

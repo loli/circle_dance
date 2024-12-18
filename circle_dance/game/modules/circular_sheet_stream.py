@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class CircularSheetStream(BaseModule, ABC):
     "Base class for all notes on a circular sheet parsed from a stream."
 
-    def __init__(self, threshold: float = 0.99, n_clones: int = 1):
+    def __init__(self, threshold: float = 0.25, n_clones: int = 1):
         """Module that parses the OS's default input stream and animate it's notes on a circular sheet.
 
         Uses a thread to process the stream for faster processing.
@@ -93,8 +93,8 @@ class DotNotesOnCircularSheetStream(CircularSheetStream):
                 callbacks.extract_node_onsets_callback,
                 self.queue,
                 self.close_request_event,
-                5,  # buffer_replenish_multiplier
-                20,  # buffer_carryover_multiplier
+                3,  # buffer_replenish_multiplier
+                8,  # buffer_carryover_multiplier
                 self.threshold,
             ),
         )

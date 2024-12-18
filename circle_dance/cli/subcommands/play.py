@@ -37,7 +37,7 @@ class PlaySubcommand(BaseSubcommand):
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument("filename", help="Song to play.")
-        parser.add_argument("-t", "--threshold", type=float, default=0.75, help="Threshold for note detection.")
+        parser.add_argument("-t", "--threshold", type=float, default=0.25, help="Threshold for note detection.")
         parser.add_argument(
             "--note-type", choices=["dot", "arc", "sarc"], default="dot", help="Type of note to use in visualization."
         )

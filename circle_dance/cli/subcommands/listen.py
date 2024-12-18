@@ -40,7 +40,7 @@ class ListenSubcommand(BaseSubcommand):
             "-t",
             "--threshold",
             type=float,
-            default=0.75,
+            default=0.25,
             help="Threshold for note detection.",
         )
         parser.add_argument(

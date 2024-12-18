@@ -9,7 +9,7 @@ from circle_dance.visualize import circular_sheet
 class CircularSheet(BaseModule):
     "Base class for all notes on a circular sheet parsed from a file."
 
-    def __init__(self, fn: str, threshold: float = 0.75, n_clones: int = 1):
+    def __init__(self, fn: str, threshold: float = 0.25, n_clones: int = 1):
         """Module that parses an audio file and animate it's notes on a circular sheet.
 
         Best combined with the `MusicPlayer` module to play the audio while the notes are animated

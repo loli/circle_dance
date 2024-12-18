@@ -4,7 +4,7 @@ import numpy as np
 import scipy
 
 
-def extract_note_durations(y, sr: float, thr: float = 0.9, slide_length: int = 512):
+def extract_note_durations(y, sr: float, thr: float = 0.25, slide_length: int = 512):
     """Extract from an audio chunk all notes/sounds with chroma energy above the threshold and returns their duration
     and energy.
 
