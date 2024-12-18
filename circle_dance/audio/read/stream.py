@@ -39,6 +39,8 @@ def stream_reader(
     close_request_event: threading.Event,
     buffer_replenish_multiplier: int,
     buffer_carryover_multiplier: int,
+    *args,  # passed to process_buffer_callback
+    **kwargs,  # passed to process_buffer_callback
 ):
     """Producer that produces notes from an audio stream. Meant to be run with multithreading.
 
@@ -87,6 +89,8 @@ def stream_reader(
                 stream_clock,
                 carryover_offset_samples,
                 carryover_offset_sec,
+                *args,
+                **kwargs,
             )
 
             # put items into queue, keeping newest items

@@ -37,9 +37,18 @@ class ListenSubcommand(BaseSubcommand):
 
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("-t", "--threshold", type=float, default=0.75, help="Threshold for note detection.")
         parser.add_argument(
-            "--note-type", choices=["dot", "arc"], default="dot", help="Type of note to use in visualization."
+            "-t",
+            "--threshold",
+            type=float,
+            default=0.75,
+            help="Threshold for note detection.",
+        )
+        parser.add_argument(
+            "--note-type",
+            choices=["dot", "sarc", "arc"],
+            default="dot",
+            help="Type of note to use in visualization.",
         )
 
     @staticmethod

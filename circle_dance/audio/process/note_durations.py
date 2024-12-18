@@ -34,7 +34,8 @@ def extract_note_durations(y, sr: float, thr: float = 0.9, slide_length: int = 5
         # is_scale=False,
         # thresh=0.5,
     )
-    chromagram = obj.chroma(obj.cqt(y), chroma_num=12)  # , norm_type=af.type.ChromaDataNormalType.NONE)
+    # chromagram = obj.chroma(obj.cqt(y), chroma_num=12)  # , norm_type=af.type.ChromaDataNormalType.NONE)
+    chromagram = obj.chroma(obj.cqt(y), chroma_num=12, norm_type=af.type.ChromaDataNormalType.P1)
 
     # prepare
     chrom_bin_time_delta = slide_length / sr

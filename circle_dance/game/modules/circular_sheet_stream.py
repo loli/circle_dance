@@ -76,7 +76,7 @@ class CircularSheetStream(BaseModule, ABC):
 
     def _should_terminate(self, g: Game, clock: float) -> bool:
         if not self.thread.is_alive():
-            logger.warn("notes_producer subprocess died; signaling game to terminate")
+            logger.warning("notes_producer subprocess died; signaling game to terminate")
             return True
         return False
 
@@ -88,8 +88,14 @@ class DotNotesOnCircularSheetStream(CircularSheetStream):
         self.close_request_event = threading.Event()
         self.thread = threading.Thread(
             target=stream_reader,
-            args=(callbacks.extract_node_onsets_callback, self.queue, self.close_request_event, 5, 20),
-            # buffer_replenish_multiplier, buffer_carryover_multiplier
+            args=(
+                callbacks.extract_node_onsets_callback,
+                self.queue,
+                self.close_request_event,
+                5,  # buffer_replenish_multiplier
+                20,  # buffer_carryover_multiplier
+                self.threshold,
+            ),
         )
         self.thread.start()
 
@@ -101,13 +107,19 @@ class SimpleArcNotesOnCircularSheetStream(CircularSheetStream):
         self.close_request_event = threading.Event()
         self.thread = threading.Thread(
             target=stream_reader,
-            args=(callbacks.extract_note_durations_callback, self.queue, self.close_request_event, 1, 20),
-            # buffer_replenish_multiplier, buffer_carryover_multiplier
+            args=(
+                callbacks.extract_note_durations_callback,
+                self.queue,
+                self.close_request_event,
+                1,  # buffer_replenish_multiplier
+                5,  # buffer_carryover_multiplier
+                self.threshold,
+            ),
         )
         self.thread.start()
 
     def _setup(self, g: Game):
-        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=1, note_pool=circular_sheet.SimpleArcNotePool)
+        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=5, note_pool=circular_sheet.SimpleArcNotePool)
 
 
 class ArcNotesOnCircularSheetStream(CircularSheetStream):

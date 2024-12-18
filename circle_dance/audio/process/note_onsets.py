@@ -19,6 +19,7 @@ def extract_note_onsets(y, sr: float, threshold: float = 0.9):
     # note: audioflux is 10x faster than librosa
     obj = af.CQT(num=12 * 7, samplate=int(sr), low_fre=af.utils.note_to_hz("C1"), bin_per_octave=12, slide_length=512)
     chroma = obj.chroma(obj.cqt(y), chroma_num=12)
+    # chroma = obj.chroma(obj.cqt(y), chroma_num=12, norm_type=af.type.ChromaDataNormalType.P1)
     # chroma = librosa.feature.chroma_cqt(y=y, sr=sr, n_chroma=12)
 
     # Compute onset strength
