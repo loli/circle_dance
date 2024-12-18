@@ -39,6 +39,7 @@ pactl load-module module-remap-source master="virtual_speaker.monitor" source_na
 2. Connect to your sound card to also listen to whatever is played
 ```
 pactl load-module module-loopback source="virtual_mic" sink=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink
+pactl load-module module-loopback source="virtual_mic" sink=alsa_output.pci-0000_00_1f.3.analog-stereo
 ```
 3. Select "virtual_speaker" resp. "virtual_mic" as your default devices in the audio settings; p.open() will automatically use the default input device
 

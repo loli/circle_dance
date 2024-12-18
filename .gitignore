@@ -2,7 +2,7 @@
 bckup/
 legacy/
 songs/
-research/
+#research/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
