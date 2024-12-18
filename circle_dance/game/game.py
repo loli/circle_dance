@@ -22,13 +22,16 @@ class Game:
     T_CALLBACK_SHOULD_TERMINATE: TypeAlias = Callable[["Game", float], bool]
     T_CALLBACK_KEYDOWN: TypeAlias = __T_CALLBACK_WO_CLOCK
 
-    def __init__(self) -> None:
+    def __init__(self, windowed: bool = False) -> None:
         """Game implementation.
 
         Takes care of initializing pygame, prepares the screen, maintains the synchronization clock, and provides a
         callback interface for modules to register to.
 
         Also takes care of teardown and all global functionality, such as processing quit commands.
+
+        Args:
+            windowed: run game in windowed mode instead of fullscreen
 
         !TBD:
             - add some parameters (e.g. fullscreen, window size, window title)
@@ -38,6 +41,8 @@ class Game:
             - callbacks registration also need to provide module name for better debug logging
             - print debug info on click duration, e.g. every 10 clicks the average or such
         """
+        self.windowed = windowed
+
         self.__callbacks_setup: list[Game.T_CALLBACK_SETUP] = []
         self.__callbacks_teardown: list[Game.T_CALLBACK_TEARDOWN] = []
         self.__callbacks_pre_run: list[Game.T_CALLBACK_PRE_RUN] = []
@@ -118,9 +123,11 @@ class Game:
         info = pygame.display.Info()
         screen_width, screen_height = info.current_w, info.current_h
 
-        # Screen setup
-        width, height = screen_width, screen_height
-        screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+        # game display setup
+        if self.windowed:
+            screen = pygame.display.set_mode((screen_width // 2, screen_height // 2), pygame.NOFRAME)
+        else:
+            screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
         pygame.display.set_caption("Circular Music Sheet Animation")
 
         self.screen = screen

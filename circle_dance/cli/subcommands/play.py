@@ -5,7 +5,6 @@ from circle_dance.game import Game, modules
 
 
 def main():
-    print(PlaySubcommand.name)
     args = get_parser().parse_args()
     PlaySubcommand.run(args)
 
@@ -45,7 +44,7 @@ class PlaySubcommand(BaseSubcommand):
 
     @staticmethod
     def run(args: argparse.Namespace) -> None:
-        g = Game()
+        g = Game(windowed=args.windowed)
 
         circular_sheet: modules.BaseModule
         if args.note_type == "dot":

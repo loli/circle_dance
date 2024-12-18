@@ -25,6 +25,7 @@ def main():
 
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="circle_dance", description="Visualize audio notes on a circular sheet.")
+    parser.add_argument("-w", "--windowed", action="store_true", help="Windowed mode.")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose mode.")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
 
