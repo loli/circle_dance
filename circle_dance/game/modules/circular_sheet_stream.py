@@ -45,8 +45,9 @@ class CircularSheetStream(BaseModule, ABC):
         #        self.thread.terminate()
         # self.thread.close()
 
+    @abstractmethod
     def _setup(self, g: Game):
-        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=1, note_pool=circular_sheet.DotNotePool)
+        pass
 
     def _teardown(self, g: Game):
         self.stop_subprocess()
@@ -99,6 +100,9 @@ class DotNotesOnCircularSheetStream(CircularSheetStream):
         )
         self.thread.start()
 
+    def _setup(self, g: Game):
+        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=1, note_pool=circular_sheet.DotNotePool)
+
 
 class SimpleArcNotesOnCircularSheetStream(CircularSheetStream):
 
@@ -119,7 +123,7 @@ class SimpleArcNotesOnCircularSheetStream(CircularSheetStream):
         self.thread.start()
 
     def _setup(self, g: Game):
-        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=5, note_pool=circular_sheet.SimpleArcNotePool)
+        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=1, note_pool=circular_sheet.SimpleArcNotePool)
 
 
 class ArcNotesOnCircularSheetStream(CircularSheetStream):
