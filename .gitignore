@@ -1,8 +1,9 @@
 # Repository specific ignores
-bckup/
+backup/
 legacy/
 songs/
 #research/
+.gh_pat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
