@@ -10,15 +10,7 @@ import pygame
 from scipy import ndimage
 
 from circle_dance.visualize import Drawable
-from circle_dance.visualize.circular_sheet import (
-    ArcNote,
-    ArcNote_Legacy,
-    DotNote,
-    Note,
-    SimpleArcNote,
-    config,
-    utils,
-)
+from circle_dance.visualize.circular_sheet import ArcNote, ArcNote_Legacy, DotNote, Note, SimpleArcNote, config, utils
 from circle_dance.visualize.draw import draw_circular_gradient
 from circle_dance.visualize.types import T_COLOR
 
@@ -237,3 +229,30 @@ class ArcNotePool_Legacy(NotePool):
                 config.rotation_period - 1,
             )
         )
+
+
+#!TBD: Move to some other kind of pool, too dissimilar
+class EnergyNotePool(NotePool):
+    def add_note(self, note: int, onset: float, conclusion: float, energy: float):
+        pass
+
+    def append_note_energies(self, frame_times: npt.NDArray, duration: float, note_energies: npt.NDArray):
+        for note in range(note_energies.shape[0]):
+            # compute note radius position from base radius
+            radius = self._get_note_radius(note)
+
+            for onset, energy in zip(frame_times, note_energies[note]):
+                if energy < 0.75:
+                    continue
+                self.notes.append(
+                    SimpleArcNote(
+                        self.surface,
+                        radius,
+                        self.note_size,
+                        # [c * energy for c in self.note_color],
+                        self.note_color,
+                        onset,
+                        onset + duration,
+                        config.rotation_period - 1,
+                    )
+                )

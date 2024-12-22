@@ -1,5 +1,6 @@
 # circular sheet visualization: main canvas
 
+import numpy.typing as npt
 import pygame
 
 from circle_dance.visualize import Drawable
@@ -75,3 +76,13 @@ class Canvas(Drawable):
     def add_note(self, sheet_id: int, note: int, onset: float, conclusion: float, energy: float):
         "Add a note to an underlying sheet."
         self.sheets[sheet_id].note_pool.add_note(note, onset, conclusion, energy)
+
+    def append_note_energies(self, frame_times: npt.NDArray, duration: float, power_spectrum: npt.NDArray):
+        "Add note energies to underlying sheets."
+        n_notes_per_octave = 12
+        for sheet_id in range(len(self.sheets)):
+            self.sheets[sheet_id].note_pool.append_note_energies(
+                frame_times,
+                duration,
+                power_spectrum[sheet_id * n_notes_per_octave : (sheet_id + 1) * n_notes_per_octave],
+            )

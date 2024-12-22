@@ -15,6 +15,7 @@ from circle_dance.visualize.circular_sheet.note_pool import (  # isort:skip
     DotNotePool,
     NotePool,
     SimpleArcNotePool,
+    EnergyNotePool,
 )
 from circle_dance.visualize.circular_sheet.sheet import Sheet  # isort:skip
 from circle_dance.visualize.circular_sheet.canvas import Canvas  # isort:skip
@@ -30,6 +31,7 @@ __all__ = [
     "DotNotePool",
     "ArcNotePool",
     "SimpleArcNotePool",
+    "EnergyNotePool",
     "ArcNotePool_Legacy",
     "Sheet",
     "Canvas",

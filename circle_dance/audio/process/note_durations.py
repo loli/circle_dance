@@ -31,10 +31,7 @@ def extract_note_durations(y, sr: float, thr: float = 0.25, slide_length: int = 
         low_fre=af.utils.note_to_hz("C1"),
         bin_per_octave=12,
         slide_length=slide_length,
-        # is_scale=False,
-        # thresh=0.5,
     )
-    # chromagram = obj.chroma(obj.cqt(y), chroma_num=12)  # , norm_type=af.type.ChromaDataNormalType.NONE)
     chromagram = obj.chroma(obj.cqt(y), chroma_num=12, norm_type=af.type.ChromaDataNormalType.P1)
 
     # prepare

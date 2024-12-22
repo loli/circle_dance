@@ -3,6 +3,7 @@ import threading
 from abc import ABC, abstractmethod
 from queue import Empty, Queue
 
+from circle_dance.audio.process import NoteEnergyCqt
 from circle_dance.audio.read import callbacks, stream_reader
 from circle_dance.game import Game
 from circle_dance.game.modules import BaseModule
@@ -130,3 +131,41 @@ class ArcNotesOnCircularSheetStream(CircularSheetStream):
 
     def _setup(self, g: Game):
         self.canvas = circular_sheet.Canvas(g.screen, n_sheets=1, note_pool=circular_sheet.ArcNotePool)
+
+
+class EnergyNotesOnCircularSheetStream(CircularSheetStream):
+
+    def __init__(self, n_octaves: int = 8):
+        super().__init__(threshold=1.0, n_clones=1)
+        self.n_octaves = n_octaves
+        self.ne = NoteEnergyCqt(sr=44100, n_octaves=n_octaves)
+
+    def start_subprocess(self):
+        self.queue = Queue()  # queue for notes
+        self.close_request_event = threading.Event()
+        self.thread = threading.Thread(
+            target=stream_reader,
+            args=(
+                self.ne.callback,
+                self.queue,
+                self.close_request_event,
+                1,  # buffer_replenish_multiplier
+                4,  # buffer_carryover_multiplier
+            ),
+        )
+        self.thread.start()
+
+    def _setup(self, g: Game):
+        self.canvas = circular_sheet.Canvas(g.screen, n_sheets=self.n_octaves, note_pool=circular_sheet.EnergyNotePool)
+
+    def _update(self, g: Game, clock: float):
+        # read all pending notes from the queue and add to canvas
+        while not self.queue.empty():
+            try:
+                frame_times, duration, power_spectrum = self.queue.get_nowait()
+                self.canvas.append_note_energies(frame_times, duration, power_spectrum)
+            except Empty:
+                pass
+
+        # draw canvas
+        self.canvas.draw(clock)

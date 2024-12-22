@@ -12,6 +12,7 @@ from circle_dance.game.modules.circular_sheet_stream import (
     ArcNotesOnCircularSheetStream,
     CircularSheetStream,
     DotNotesOnCircularSheetStream,
+    EnergyNotesOnCircularSheetStream,
     SimpleArcNotesOnCircularSheetStream,
 )
 from circle_dance.game.modules.music_player import MusicPlayer
@@ -25,5 +26,6 @@ __all__ = [
     "DotNotesOnCircularSheetStream",
     "ArcNotesOnCircularSheetStream",
     "SimpleArcNotesOnCircularSheetStream",
+    "EnergyNotesOnCircularSheetStream",
     "MusicPlayer",
 ]

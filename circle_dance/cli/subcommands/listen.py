@@ -45,7 +45,7 @@ class ListenSubcommand(BaseSubcommand):
         )
         parser.add_argument(
             "--note-type",
-            choices=["dot", "sarc", "arc"],
+            choices=["dot", "sarc", "arc", "energy"],
             default="dot",
             help="Type of note to use in visualization.",
         )
@@ -59,8 +59,10 @@ class ListenSubcommand(BaseSubcommand):
             circular_sheet = modules.DotNotesOnCircularSheetStream(threshold=args.threshold)
         elif args.note_type == "sarc":
             circular_sheet = modules.SimpleArcNotesOnCircularSheetStream(threshold=args.threshold)
-        else:
+        elif args.note_type == "arc":
             circular_sheet = modules.ArcNotesOnCircularSheetStream(threshold=args.threshold)
+        elif args.note_type == "energy":
+            circular_sheet = modules.EnergyNotesOnCircularSheetStream()
         circular_sheet.register_callbacks(g)
 
         g.run()
