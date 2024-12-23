@@ -5,6 +5,8 @@ import numpy.typing as npt
 
 
 class NoteEnergyCqt:
+    
+    NORM_TYPES = ["global", "octave", "note"]
 
     def __init__(
         self,
@@ -14,7 +16,7 @@ class NoteEnergyCqt:
         padding_frames: int = 1,
         norm_type: str = "octave",
         norm_div_init: float = 5.0,
-        norm_div_alpha: float = 0.002,
+        norm_div_alpha: float = 0.02,
         low_freq=af.utils.note_to_hz("C1"),
         n_octaves: int = 7,
         n_notes_per_octave: int = 12,
@@ -46,8 +48,9 @@ class NoteEnergyCqt:
             n_octaves: Number of octaves to include in the CQT.
             n_notes_per_octave: Number of notes per octave.
         """
+        assert filter_scale > 0
         assert padding_frames >= 0
-        assert norm_type in ["global", "octave", "note"]
+        assert norm_type in NoteEnergyCqt.NORM_TYPES
         assert norm_div_init > 0
         assert norm_div_alpha >= 0
         assert n_octaves > 0
@@ -57,16 +60,16 @@ class NoteEnergyCqt:
         self.slide_length = slide_length
         self.n_padding_frames = padding_frames
         self.n_padding_samples = librosa.frames_to_samples(padding_frames, hop_length=slide_length)
-        self.norm_type = norm_type
+        self._norm_type = norm_type
         self.running_norm_div = np.asarray([norm_div_init] * (n_octaves * n_notes_per_octave))
-        self.norm_div_alpha = norm_div_alpha
+        self._norm_div_alpha = norm_div_alpha
         self.note_ids = np.arange(n_octaves * n_notes_per_octave)
 
-        self.filter_scale = filter_scale
+        self._filter_scale = filter_scale
         self.low_freq = low_freq
         self.n_octaves = n_octaves
         self.n_notes_per_octave = n_notes_per_octave
-
+        
     def extract(self, y: npt.NDArray, carryover_samples: int):
         """Extract the normalized Constant-Q power spectrum from an audio chunk.
 
@@ -131,3 +134,55 @@ class NoteEnergyCqt:
         frame_times += stream_clock
         duration = librosa.frames_to_time(1)
         return [(frame_times, duration, power_spectrum)]
+
+        
+    @property
+    def filter_scale(self) -> float:
+        return self._filter_scale
+    
+    @filter_scale.setter
+    def filter_scale(self, value: float) -> None:
+        assert value > 0
+        self._filter_scale = value
+        
+    def get_filter_scale(self) -> float:
+        return self._filter_scale
+    
+    def increase_filter_scale(self):
+        self._filter_scale = min(5.0, self._filter_scale + 0.1)
+
+    def decrease_filter_scale(self):
+        self._filter_scale = max(0.1, self._filter_scale - 0.1)
+        
+    @property
+    def norm_type(self) -> str:
+        return self._norm_type
+    
+    @norm_type.setter
+    def set_norm_type(self, value: str) -> None:
+        assert value in NoteEnergyCqt.NORM_TYPES
+        self._norm_type = value
+    
+    def get_norm_type(self) -> str:
+        return self._norm_type
+        
+    def toggle_norm_type(self):
+        self._norm_type = dict(zip(NoteEnergyCqt.NORM_TYPES, NoteEnergyCqt.NORM_TYPES[1:] + [NoteEnergyCqt.NORM_TYPES[0]]))[self._norm_type]
+
+    @property
+    def norm_div_alpha(self) -> float:
+        return self._norm_div_alpha
+    
+    @norm_div_alpha.setter
+    def norm_div_alpha(self, value: float) -> None:
+        assert value > 0
+        self._norm_div_alpha = value
+        
+    def get_norm_div_alpha(self) -> float:
+        return self._norm_div_alpha
+    
+    def increase_norm_div_alpha(self):
+        self._norm_div_alpha = min(1.0, self._norm_div_alpha + 0.01)
+
+    def decrease_norm_div_alpha(self):
+        self._norm_div_alpha = max(0.0, self._norm_div_alpha - 0.01)

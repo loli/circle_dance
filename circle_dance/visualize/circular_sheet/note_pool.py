@@ -233,6 +233,10 @@ class ArcNotePool_Legacy(NotePool):
 
 #!TBD: Move to some other kind of pool, too dissimilar
 class EnergyNotePool(NotePool):
+    def __init__(self, surface: pygame.Surface, note_base_radius: int, note_size: int, note_color: T_COLOR):
+        super().__init__(surface, note_base_radius, note_size, note_color)
+        self._threshold = 0.75
+        
     def add_note(self, note: int, onset: float, conclusion: float, energy: float):
         pass
 
@@ -242,17 +246,34 @@ class EnergyNotePool(NotePool):
             radius = self._get_note_radius(note)
 
             for onset, energy in zip(frame_times, note_energies[note]):
-                if energy < 0.75:
-                    continue
-                self.notes.append(
-                    SimpleArcNote(
-                        self.surface,
-                        radius,
-                        self.note_size,
-                        # [c * energy for c in self.note_color],
-                        self.note_color,
-                        onset,
-                        onset + duration,
-                        config.rotation_period - 1,
+                if energy > self._threshold:
+                    self.notes.append(
+                        SimpleArcNote(
+                            self.surface,
+                            radius,
+                            self.note_size,
+                            # [c * energy for c in self.note_color],
+                            self.note_color,
+                            onset,
+                            onset + duration,
+                            config.rotation_period - 1,
+                        )
                     )
-                )
+
+    @property
+    def threshold(self) -> float:
+        return self._threshold
+    
+    @threshold.setter
+    def threshold(self, value: float) -> None:
+        assert value > 0
+        self._threshold = value
+        
+    def get_threshold(self) -> float:
+        return self._threshold
+    
+    def increase_threshold(self):
+        self._threshold = min(1.0, self._threshold + 0.05)
+
+    def decrease_threshold(self):
+        self._threshold = max(0.0, self._threshold - 0.05)

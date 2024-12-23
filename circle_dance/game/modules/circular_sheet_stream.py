@@ -3,6 +3,8 @@ import threading
 from abc import ABC, abstractmethod
 from queue import Empty, Queue
 
+import pygame
+
 from circle_dance.audio.process import NoteEnergyCqt
 from circle_dance.audio.read import callbacks, stream_reader
 from circle_dance.game import Game
@@ -157,6 +159,14 @@ class EnergyNotesOnCircularSheetStream(CircularSheetStream):
 
     def _setup(self, g: Game):
         self.canvas = circular_sheet.Canvas(g.screen, n_sheets=self.n_octaves, note_pool=circular_sheet.EnergyNotePool)
+
+        g.register_keydown_callback("toggle(norm_type)", pygame.K_n, lambda _: self.ne.toggle_norm_type(), self.ne.get_norm_type)
+        g.register_keydown_callback("inc(norm_div_alpha)", pygame.K_a, lambda _: self.ne.increase_norm_div_alpha(), self.ne.get_norm_div_alpha)
+        g.register_keydown_callback("dec(norm_div_alpha)", pygame.K_s, lambda _: self.ne.decrease_norm_div_alpha(), self.ne.get_norm_div_alpha)
+        g.register_keydown_callback("inc(filter_scale)", pygame.K_f, lambda _: self.ne.increase_filter_scale(), self.ne.get_filter_scale)
+        g.register_keydown_callback("dec(filter_scale)", pygame.K_g, lambda _: self.ne.decrease_filter_scale(), self.ne.get_filter_scale)
+        g.register_keydown_callback("inc(threshold)", pygame.K_t, lambda _: [s.note_pool.increase_threshold() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_threshold)
+        g.register_keydown_callback("dec(threshold)", pygame.K_y, lambda _: [s.note_pool.decrease_threshold() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_threshold)
 
     def _update(self, g: Game, clock: float):
         # read all pending notes from the queue and add to canvas

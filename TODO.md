@@ -40,6 +40,7 @@ pactl load-module module-remap-source master="virtual_speaker.monitor" source_na
 ```
 pactl load-module module-loopback source="virtual_mic" sink=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink
 pactl load-module module-loopback source="virtual_mic" sink=alsa_output.pci-0000_00_1f.3.analog-stereo
+pactl load-module module-loopback source="virtual_mic" sink=bluez_output.AC_80_0A_F6_4C_E7.1
 ```
 3. Select "virtual_speaker" resp. "virtual_mic" as your default devices in the audio settings; p.open() will automatically use the default input device
 

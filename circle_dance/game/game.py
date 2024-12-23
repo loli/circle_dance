@@ -6,7 +6,6 @@ from typing import Callable, TypeAlias
 
 import pygame
 
-
 class Game:
 
     # base types
@@ -51,6 +50,7 @@ class Game:
         self.__callbacks_should_terminate: list[Game.T_CALLBACK_SHOULD_TERMINATE] = []
         self.__callbacks_keydown: dict[int, Game.T_CALLBACK_KEYDOWN] = {}
 
+
     def run(self) -> None:
         "Run the game."
         # setup
@@ -63,6 +63,7 @@ class Game:
         running = True
 
         # pre-run callbacks
+        self._pre_run()
         [c(self, clock) for c in self.__callbacks_pre_run]
 
         while running:
@@ -70,8 +71,11 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     running = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                    self.display_controls()
                 elif event.type == pygame.KEYDOWN and event.key in self.__callbacks_keydown:
-                    self.__callbacks_keydown[event.key](self)  # handle keydown callbacks
+                    self.__callbacks_keydown[event.key]["callback"](self)  # handle keydown callbacks
+                    self.logger.display_line(f"{self.__callbacks_keydown[event.key]['name']} = {self.__callbacks_keydown[event.key]['get']()}")
 
             # update clock
             clock = time.time() - start_time
@@ -112,12 +116,13 @@ class Game:
     def register_should_terminate_callback(self, callback: T_CALLBACK_SHOULD_TERMINATE) -> None:
         self.__callbacks_should_terminate.append(callback)
 
-    def register_keydown_callback(self, key: int, callback: T_CALLBACK_KEYDOWN) -> None:
-        self.__callbacks_keydown[key] = callback
+    def register_keydown_callback(self, name: str, key: int, callback: T_CALLBACK_KEYDOWN, get: T_CALLBACK_KEYDOWN) -> None:
+        self.__callbacks_keydown[key] = {"name": name, "callback": callback, "get": get}
 
     def _setup(self) -> None:
         "Game setup, before the clock starts."
         pygame.init()
+        pygame.font.init()
 
         # get screen resolution
         info = pygame.display.Info()
@@ -131,7 +136,62 @@ class Game:
         pygame.display.set_caption("Circular Music Sheet Animation")
 
         self.screen = screen
+        self.logger = LogDisplay(self)  # must be initialized last, as should be last update to call
+        
+    def _pre_run(self) -> None:
+        "Game pre-run, before the clock starts."
+        self.display_controls()  # once at start
 
     def _teardown(self) -> None:
         "Game teardown, after the clock stops."
         pygame.quit()
+        
+    def display_controls(self) -> None:
+        lines = ["Controls:"]
+        for k in self.__callbacks_keydown:
+            lines.append(f"{pygame.key.name(k)}: {self.__callbacks_keydown[k]['name']}")
+        self.logger.display_lines(lines)
+
+
+class LogDisplay():
+
+    def __init__(self, g: Game, t_visible: float = 1.):
+        """Log display module.
+
+        Provides a surface on which text can be displayed.
+        This module is intended to be always active in each game.
+        The display disappears after some time.
+
+
+        Args:
+            t_visible: visibility on screen in seconds
+        """
+        self.t_visible = t_visible
+        
+        self.font = pygame.font.SysFont('mono', 14)
+        self.color = (255, 255, 255)
+        self.bg_color = (0, 0, 0)
+        
+        self.make_visible = False
+        self.t_became_visible = 0
+        self.lines = []
+        
+        g.register_update_callback(self._update)
+
+    def display_lines(self, lines: list[str]):
+        self.make_visible = True
+        self.lines = lines
+        
+    def display_line(self, line: str):
+        self.display_lines([line])
+
+    def _update(self, g: Game, clock: float):
+        if self.make_visible:
+            self.t_became_visible = clock
+            self.make_visible = False
+        if clock - self.t_became_visible < self.t_visible:
+            y = 10
+            for line in self.lines:
+                text_surface = self.font.render(line, True, self.color, self.bg_color)
+                g.screen.blit(text_surface, (10, y))
+                y += text_surface.get_height()
