@@ -21,7 +21,7 @@ class Game:
     T_CALLBACK_SHOULD_TERMINATE: TypeAlias = Callable[["Game", float], bool]
     T_CALLBACK_KEYDOWN: TypeAlias = __T_CALLBACK_WO_CLOCK
 
-    def __init__(self, windowed: bool = False) -> None:
+    def __init__(self, windowed: bool = False, fps: int = 40) -> None:
         """Game implementation.
 
         Takes care of initializing pygame, prepares the screen, maintains the synchronization clock, and provides a
@@ -31,6 +31,7 @@ class Game:
 
         Args:
             windowed: run game in windowed mode instead of fullscreen
+            fps: set to a value higher than 0 to limit framerate
 
         !TBD:
             - add some parameters (e.g. fullscreen, window size, window title)
@@ -41,6 +42,8 @@ class Game:
             - print debug info on click duration, e.g. every 10 clicks the average or such
         """
         self.windowed = windowed
+        self.fps = fps
+        self.clock = 0.0
 
         self.__callbacks_setup: list[Game.T_CALLBACK_SETUP] = []
         self.__callbacks_teardown: list[Game.T_CALLBACK_TEARDOWN] = []
@@ -59,12 +62,13 @@ class Game:
 
         # Animation loop
         start_time = time.time()
-        clock = 0.0
+        #clock = pygame.time.get_ticks() / 1000  # in seconds, passed since init()
+        gclock = pygame.time.Clock()
         running = True
 
         # pre-run callbacks
         self._pre_run()
-        [c(self, clock) for c in self.__callbacks_pre_run]
+        [c(self, self.clock) for c in self.__callbacks_pre_run]
 
         while running:
             # exit on ESC and pygame.QUIT
@@ -78,25 +82,32 @@ class Game:
                     self.logger.display_line(f"{self.__callbacks_keydown[event.key]['name']} = {self.__callbacks_keydown[event.key]['get']()}")
 
             # update clock
-            clock = time.time() - start_time
+            #clock = pygame.time.get_ticks() / 1000
 
             # update by calling update on each module
             # mainly used to update the screen
-            [c(self, clock) for c in self.__callbacks_update]
+            [c(self, self.clock) for c in self.__callbacks_update]
 
             pygame.display.flip()
 
             # check if termination desire signaled by any module
-            if functools.reduce(lambda a, b: a or b, [c(self, clock) for c in self.__callbacks_should_terminate]):
+            if functools.reduce(lambda a, b: a or b, [c(self, self.clock) for c in self.__callbacks_should_terminate]):
                 running = False
+                
+            print("g:clock(s):", self.clock)
+            print("g:fps:", gclock.get_fps())
+            gclock.tick(self.fps)
+            self.clock += gclock.get_time() / 1000
 
         # post-run callbacks
-        clock = time.time() - start_time
-        [c(self, clock) for c in self.__callbacks_post_run]
+        [c(self, self.clock) for c in self.__callbacks_post_run]
 
         # teardown
         [c(self) for c in self.__callbacks_teardown]
         self._teardown()
+        
+    def set_clock(self, time: float) -> None:
+        self.clock = time
 
     def register_setup_callback(self, callback: T_CALLBACK_SETUP) -> None:
         self.__callbacks_setup.append(callback)

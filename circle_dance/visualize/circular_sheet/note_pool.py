@@ -236,6 +236,7 @@ class EnergyNotePool(NotePool):
     def __init__(self, surface: pygame.Surface, note_base_radius: int, note_size: int, note_color: T_COLOR):
         super().__init__(surface, note_base_radius, note_size, note_color)
         self._threshold = 0.75
+        self._clock_correction = 0.0
         
     def add_note(self, note: int, onset: float, conclusion: float, energy: float):
         pass
@@ -247,6 +248,7 @@ class EnergyNotePool(NotePool):
 
             for onset, energy in zip(frame_times, note_energies[note]):
                 if energy > self._threshold:
+                    onset += self.clock_correction
                     self.notes.append(
                         SimpleArcNote(
                             self.surface,
@@ -277,3 +279,22 @@ class EnergyNotePool(NotePool):
 
     def decrease_threshold(self):
         self._threshold = max(0.0, self._threshold - 0.05)
+        
+
+    @property
+    def clock_correction(self) -> float:
+        return self._clock_correction
+    
+    @clock_correction.setter
+    def clock_correction(self, value: float) -> None:
+        assert value > 0
+        self._clock_correction = value
+        
+    def get_clock_correction(self) -> float:
+        return self._clock_correction
+    
+    def increase_clock_correction(self):
+        self._clock_correction = self._clock_correction + 0.1
+
+    def decrease_clock_correction(self):
+        self._clock_correction = self._clock_correction - 0.1

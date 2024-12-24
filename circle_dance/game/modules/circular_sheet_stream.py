@@ -167,12 +167,15 @@ class EnergyNotesOnCircularSheetStream(CircularSheetStream):
         g.register_keydown_callback("dec(filter_scale)", pygame.K_g, lambda _: self.ne.decrease_filter_scale(), self.ne.get_filter_scale)
         g.register_keydown_callback("inc(threshold)", pygame.K_t, lambda _: [s.note_pool.increase_threshold() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_threshold)
         g.register_keydown_callback("dec(threshold)", pygame.K_y, lambda _: [s.note_pool.decrease_threshold() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_threshold)
+        g.register_keydown_callback("inc(clock_correction)", pygame.K_v, lambda _: [s.note_pool.increase_clock_correction() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_clock_correction)
+        g.register_keydown_callback("dec(clock_correction)", pygame.K_b, lambda _: [s.note_pool.decrease_clock_correction() for s in self.canvas.sheets], self.canvas.sheets[0].note_pool.get_clock_correction)
 
     def _update(self, g: Game, clock: float):
         # read all pending notes from the queue and add to canvas
         while not self.queue.empty():
             try:
                 frame_times, duration, power_spectrum = self.queue.get_nowait()
+                g.set_clock(frame_times.max())  # harmonize clock; !TBD: not quite exact, as should be max() + chunk_size / sr; ideally, stream communicates stream clock back
                 self.canvas.append_note_energies(frame_times, duration, power_spectrum)
             except Empty:
                 pass
